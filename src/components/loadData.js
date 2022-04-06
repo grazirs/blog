@@ -31,5 +31,18 @@ export const loadData = (setPosts, setError) => {
     return currentPosts.then((previousPosts) => posts()
       .then((newPosts) => [...previousPosts, ...newPosts]));
   }, Promise.resolve([]))
-  .then(setPosts).catch(setError);
-}
+  .then((posts) => {
+    setPosts(posts);
+    loadComments(posts).then(() => setPosts([...posts]));
+  }).catch(setError);
+};
+
+const loadComments = (posts) => {
+  return posts.forEach(post => {
+    return axios.get(`${API_URL}/${post.id}/comments`)
+    .then((response) => {
+      post.comments = response.data;
+    })
+    .catch((error) => console.log(error));
+  });
+};
