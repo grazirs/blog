@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { loadData, loadComments } from "./loadData";
+import { loadData, loadComments, loadUsers } from "./loadData";
 
 const Content = () => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
+  const [users, setUsers] = useState([]);
 
   const addComments = (loadedPosts) => {
     loadComments(loadedPosts).then((postsWithComments) => {
@@ -11,10 +12,16 @@ const Content = () => {
     }).catch(setError);
   };
 
+  console.log(users)
+  const addUsers = (loadedPosts) => {
+    loadUsers(loadedPosts).then(setUsers).catch(setError);
+  }
+
   useEffect(() => {
     loadData().then((loadedPosts) => {
       setPosts(loadedPosts);
       addComments(loadedPosts);
+      addUsers(loadedPosts);
     }).catch(setError);
   },[]);
 
