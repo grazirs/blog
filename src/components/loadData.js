@@ -24,12 +24,21 @@ const getPosts = (page, pageSize) => () => {
   .then((response) => response.data);
 };
 
-export const loadData = (setPosts, setError) => {
+export const loadData = () => {
   return pageSizes().reduce((currentPosts, pageSize, page) => {
     const posts = getPosts(page, pageSize);
 
     return currentPosts.then((previousPosts) => posts()
       .then((newPosts) => [...previousPosts, ...newPosts]));
-  }, Promise.resolve([]))
-  .then(setPosts).catch(setError);
-}
+  }, Promise.resolve([]));
+};
+
+export const loadComments = (posts) => {
+  return Promise.all(posts.map(post => {
+    return axios.get(`${API_URL}/${post.id}/comments`)
+    .then((response) => {
+      return {...post, comments: response.data};
+    })
+    .catch((error) => console.log(error));
+  }));
+};
