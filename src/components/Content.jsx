@@ -12,7 +12,6 @@ const Content = () => {
     }).catch(setError);
   };
 
-  console.log(users)
   const addUsers = (loadedPosts) => {
     loadUsers(loadedPosts).then(setUsers).catch(setError);
   }

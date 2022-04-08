@@ -36,31 +36,32 @@ export const loadData = () => {
 };
 
 export const loadComments = (posts) => {
-  return posts.reduce((updatedPosts, currentPost) => {
-    const post = axios
-      .get(`${API_URL}/posts/${currentPost.id}/comments`)
-      .then((response) => {
-        return { ...currentPost, comments: response.data };
-      });
-    return updatedPosts.then((previousPosts) => {
-      return post.then((updatedPost) => {
-        return [...previousPosts, updatedPost];
-      });
-    });
-  }, Promise.resolve([]));
+  return Promise.all(posts.map(post => {
+    return axios.get(`${API_URL}/posts/${post.id}/comments`)
+    .then((response) => {
+      return {...post, comments: response.data};
+    })
+    .catch((error) => console.log(error));
+  }));
 };
 
 export const loadUsers = (posts) => {
-  return posts.reduce((users, currentPost, index) => {
-    const existingPostForCurrentPost = posts.findIndex(
-      (post) => post.userId === currentPost.userId
-    );
-    if (existingPostForCurrentPost < index) return users;
-    const user = axios
-      .get(`${API_URL}/users/${currentPost.userId}`)
-      .then((response) => response.data);
-    return users.then((previousUsers) =>
-      user.then((newUser) => [...previousUsers, newUser])
-    );
-  }, Promise.resolve([]));
+  const uniqueUsers = [...new Set(posts.map((post) => {
+        return post.userId;
+      })
+    ),
+  ];
+  const users = Promise.all(
+    uniqueUsers.map((userId) => {
+      return axios
+        .get(`${API_URL}/users/${userId}`)
+        .then((response) => response.data);
+    }))
+  return users.then((users) => {
+    return posts.map((post) => {
+      return {...post, user: users.find((user) => {
+        return user.id === post.userId;
+      })};
+    });
+  });
 };
