@@ -34,15 +34,11 @@ export const loadData = () => {
 };
 
 export const loadComments = (posts) => {
-  return posts.reduce((updatedPosts, currentPost ) => {
-    const post = axios.get(`${API_URL}/${currentPost.id}/comments`)
+  return Promise.all(posts.map(post => {
+    return axios.get(`${API_URL}/${post.id}/comments`)
     .then((response) => {
-      return {...currentPost, comments: response.data};
-    });
-    return updatedPosts.then((previousPosts) => { 
-      return post.then((updatedPost) => {
-        return [...previousPosts, updatedPost];
-      })
+      return {...post, comments: response.data};
     })
-  }, Promise.resolve([]));
+    .catch((error) => console.log(error));
+  }));
 };
